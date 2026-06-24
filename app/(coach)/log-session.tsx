@@ -10,7 +10,9 @@ import {
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Card, Field } from '@/components/ui';
+import { MediaStrip } from '@/components/MediaStrip';
 import { supabase } from '@/lib/supabase';
+import { pickAndUploadMedia } from '@/lib/media';
 import { useAuth } from '@/lib/auth';
 import type { Player } from '@/lib/database.types';
 import { colors, radius, spacing } from '@/lib/theme';
@@ -39,6 +41,8 @@ export default function LogSession() {
   const [rating, setRating] = useState(0);
   const [notes, setNotes] = useState('');
   const [nextFocus, setNextFocus] = useState('');
+  const [media, setMedia] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useFocusEffect(
@@ -58,6 +62,20 @@ export default function LogSession() {
     );
   }
 
+  async function addPhotos() {
+    if (!playerId) return Alert.alert('Pick a player first.');
+    if (!profile) return;
+    setUploading(true);
+    try {
+      const paths = await pickAndUploadMedia(profile.id, playerId);
+      if (paths.length) setMedia((cur) => [...cur, ...paths]);
+    } catch (e: any) {
+      Alert.alert('Upload failed', e.message ?? 'Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function save() {
     if (!playerId) return Alert.alert('Pick a player first.');
     if (!profile) return;
@@ -69,6 +87,7 @@ export default function LogSession() {
       rating: rating || null,
       notes: notes.trim() || null,
       next_focus: nextFocus.trim() || null,
+      media_urls: media,
     });
     setSaving(false);
     if (error) return Alert.alert('Could not save', error.message);
@@ -78,6 +97,7 @@ export default function LogSession() {
     setRating(0);
     setNotes('');
     setNextFocus('');
+    setMedia([]);
     Alert.alert('Session logged', 'The parent has been updated.', [
       { text: 'OK', onPress: () => router.replace('/(coach)') },
     ]);
@@ -149,6 +169,17 @@ export default function LogSession() {
             value={nextFocus}
             onChangeText={setNextFocus}
           />
+        </Card>
+
+        <Card>
+          <Text style={styles.section}>Photos</Text>
+          <Button
+            title={media.length ? `Add more (${media.length})` : 'Add photos'}
+            variant="ghost"
+            onPress={addPhotos}
+            loading={uploading}
+          />
+          <MediaStrip paths={media} />
         </Card>
 
         <Button title="Save & notify parent" onPress={save} loading={saving} />

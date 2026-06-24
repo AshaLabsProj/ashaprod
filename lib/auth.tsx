@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { Session as AuthSession } from '@supabase/supabase-js';
 import { supabase } from './supabase';
+import { registerForPush } from './notifications';
 import type { Profile, UserRole } from './database.types';
 
 interface AuthState {
@@ -51,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (active) {
           setProfile(data);
           setLoading(false);
+          if (data) registerForPush(data.id);
         }
       });
     return () => {

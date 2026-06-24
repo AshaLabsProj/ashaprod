@@ -54,6 +54,26 @@ export type ParentUpdate = {
   created_at: string;
 }
 
+export type PlayerGuardian = {
+  player_id: string;
+  guardian_id: string;
+  relationship: string | null;
+  consent_given_at: string | null;
+  created_at: string;
+}
+
+export type Invite = {
+  id: string;
+  coach_id: string;
+  player_id: string;
+  code: string;
+  email: string | null;
+  claimed_by: string | null;
+  claimed_at: string | null;
+  expires_at: string;
+  created_at: string;
+}
+
 // Minimal shape consumed by supabase-js generics. Each table needs
 // Row/Insert/Update/Relationships; the schema needs Tables/Views/Functions/
 // Enums/CompositeTypes — otherwise the generic resolves to `never`.
@@ -72,9 +92,16 @@ export interface Database {
       players: Table<Player>;
       sessions: Table<Session>;
       parent_updates: Table<ParentUpdate>;
+      player_guardians: Table<PlayerGuardian>;
+      invites: Table<Invite>;
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      claim_invite: {
+        Args: { invite_code: string; consent: boolean };
+        Returns: Player;
+      };
+    };
     Enums: { user_role: UserRole };
     CompositeTypes: Record<string, never>;
   };

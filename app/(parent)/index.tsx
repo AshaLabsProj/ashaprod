@@ -1,8 +1,9 @@
 import { useCallback, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Card } from '@/components/ui';
+import { Button, Card } from '@/components/ui';
+import { MediaStrip } from '@/components/MediaStrip';
 import { supabase } from '@/lib/supabase';
 import { colors, spacing } from '@/lib/theme';
 
@@ -17,11 +18,13 @@ interface FeedRow {
     notes: string | null;
     rating: number | null;
     next_focus: string | null;
+    media_urls: string[];
     players: { full_name: string } | null;
   } | null;
 }
 
 export default function ParentFeed() {
+  const router = useRouter();
   const [rows, setRows] = useState<FeedRow[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -29,7 +32,7 @@ export default function ParentFeed() {
     const { data } = await supabase
       .from('parent_updates')
       .select(
-        'id, read_at, sessions(session_date, focus_areas, notes, rating, next_focus, players(full_name))',
+        'id, read_at, sessions(session_date, focus_areas, notes, rating, next_focus, media_urls, players(full_name))',
       )
       .order('created_at', { ascending: false });
     setRows((data as unknown as FeedRow[]) ?? []);
@@ -66,10 +69,19 @@ export default function ParentFeed() {
             }}
           />
         }
+        ListHeaderComponent={
+          <View style={{ marginBottom: spacing.sm }}>
+            <Button
+              title="Claim an invite"
+              variant="ghost"
+              onPress={() => router.push('/(parent)/claim')}
+            />
+          </View>
+        }
         ListEmptyComponent={
           <Text style={styles.empty}>
-            No updates yet. You'll see a note here every time your child's coach
-            works with them.
+            No updates yet. Tap "Claim an invite" above and enter the code from
+            your coach to start following your child.
           </Text>
         }
         renderItem={({ item }) => {
@@ -86,6 +98,7 @@ export default function ParentFeed() {
               )}
               {s.notes ? <Text style={styles.notes}>{s.notes}</Text> : null}
               {s.next_focus ? <Text style={styles.next}>Next: {s.next_focus}</Text> : null}
+              <MediaStrip paths={s.media_urls ?? []} />
             </Card>
           );
         }}

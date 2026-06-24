@@ -38,8 +38,9 @@ export default function CoachLayout() {
           tabBarIcon: ({ color }) => <Icon glyph="⚙️" color={color} />,
         }}
       />
-      {/* Detail screen reached from the roster; hidden from the tab bar. */}
+      {/* Detail screens reached from the roster; hidden from the tab bar. */}
       <Tabs.Screen name="players/[id]" options={{ href: null, title: 'Player' }} />
+      <Tabs.Screen name="invite/[playerId]" options={{ href: null, title: 'Invite' }} />
     </Tabs>
   );
 }

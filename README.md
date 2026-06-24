@@ -49,9 +49,10 @@ supabase/migrations/     # SQL schema + RLS + triggers
    ```bash
    npm install
    ```
-2. **Create a Supabase project** at supabase.com, then run the migration:
-   - Easiest: open the SQL editor in the dashboard and paste
-     `supabase/migrations/0001_init.sql`.
+2. **Create a Supabase project** at supabase.com, then run the migrations
+   **in order**:
+   - Easiest: open the SQL editor in the dashboard and paste, one at a time,
+     `supabase/migrations/0001_init.sql` then `supabase/migrations/0002_invites_consent_media.sql`.
    - Or with the CLI: `supabase link` then `supabase db push`.
 3. **Configure env** — copy `.env.example` to `.env` and fill in your project's
    URL and anon key (Supabase → Project Settings → API):
@@ -64,14 +65,32 @@ supabase/migrations/     # SQL schema + RLS + triggers
    npm start          # then press i (iOS) / a (Android), or scan with Expo Go
    ```
 
+## Push notifications (Phase B)
+
+Remote push needs a real device build — **it does not work in Expo Go** (SDK 53+).
+
+1. Deploy the edge function that sends the push:
+   ```bash
+   supabase functions deploy notify-parents
+   ```
+2. Add a **Database Webhook** (Dashboard → Database → Webhooks): table
+   `parent_updates`, event `INSERT`, type *Supabase Edge Function* →
+   `notify-parents`.
+3. Make a **dev build** so the device can register a push token:
+   ```bash
+   eas build --profile development --platform ios   # or android
+   ```
+The app registers the device's Expo push token on login (`profiles.push_token`);
+the function reads it and posts to Expo's push API on every new parent update.
+
 ## Testing the loop quickly
 
-1. Sign up as a **coach**, add a player.
-2. Sign up (different email) as a **parent**.
-3. In Supabase, add a row to `player_guardians` linking the player to the
-   parent's profile id. *(An in-app invite/claim flow is the next phase.)*
-4. As the coach, **log a session**. As the parent, pull-to-refresh **Updates** —
-   the session is there.
+1. Sign up as a **coach**, add a player, open the player → **Invite parent** →
+   *Generate invite code*.
+2. Sign up (different email) as a **parent** → **Claim an invite** → enter the
+   code, tick consent, connect.
+3. As the coach, **log a session** (optionally attach photos). As the parent,
+   pull-to-refresh **Updates** — the session, note, and photos are there.
 
 ---
 
@@ -115,9 +134,10 @@ Consider a brief legal review given the youth-data focus.
 
 ## Roadmap
 - [x] Auth + roles, roster, session logging, auto parent updates, parent feed
-- [ ] Expo push notifications on new parent update
-- [ ] Photo/video upload to Supabase Storage
-- [ ] In-app invite + parental-consent claim flow
-- [ ] Skill assessments over time (charts) + development goals
+- [x] In-app invite + parental-consent claim flow (Phase A)
+- [x] Expo push notifications on new parent update (Phase B)
+- [x] Photo upload to Supabase Storage + display in timeline/feed (Phase C)
+- [ ] Skill assessments over time (charts) + development goals (Phase D —
+      pending the scoring metrics from the legacy `skilltracker` app)
 - [ ] Teams/club management, multi-coach roles
 - [ ] Subscriptions (RevenueCat)

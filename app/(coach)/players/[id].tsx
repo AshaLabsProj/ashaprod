@@ -8,6 +8,7 @@ import {
 } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Card } from '@/components/ui';
+import { MediaStrip } from '@/components/MediaStrip';
 import { supabase } from '@/lib/supabase';
 import type { Player, Session } from '@/lib/database.types';
 import { colors, spacing } from '@/lib/theme';
@@ -46,11 +47,18 @@ export default function PlayerDetail() {
         keyExtractor={(s) => s.id}
         contentContainerStyle={{ padding: spacing.md, gap: spacing.sm }}
         ListHeaderComponent={
-          <View style={{ marginBottom: spacing.sm }}>
+          <View style={{ marginBottom: spacing.sm, gap: spacing.sm }}>
             <Button
               title="Log a session"
               onPress={() =>
                 router.push({ pathname: '/(coach)/log-session', params: { playerId: id } })
+              }
+            />
+            <Button
+              title="Invite parent"
+              variant="ghost"
+              onPress={() =>
+                router.push({ pathname: '/(coach)/invite/[playerId]', params: { playerId: id } })
               }
             />
           </View>
@@ -75,6 +83,7 @@ export default function PlayerDetail() {
             {item.next_focus ? (
               <Text style={styles.next}>Next: {item.next_focus}</Text>
             ) : null}
+            <MediaStrip paths={item.media_urls} />
           </Card>
         )}
       />

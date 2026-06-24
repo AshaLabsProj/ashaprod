@@ -15,6 +15,7 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.23.1",
     "@supabase/supabase-js": "^2.45.0",
+    "base64-arraybuffer": "^1.0.2",
     "expo": "~51.0.28",
     "expo-constants": "~16.0.2",
     "expo-image-picker": "~15.0.7",
