@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Asha Coach",
+    "slug": "asha-coach",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "ashacoach",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B6E4F"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ashalabs.coach",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Asha Coach needs photo access so you can attach photos to a player's session.",
+        "NSCameraUsageDescription": "Asha Coach needs camera access so you can capture session photos and video."
+      }
+    },
+    "android": {
+      "package": "com.ashalabs.coach",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B6E4F"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        { "photosPermission": "Attach photos to a player's session." }
+      ],
+      "expo-notifications"
+    ],
+    "extra": {
+      "supabaseUrl": "https://YOUR_PROJECT.supabase.co",
+      "supabaseAnonKey": "YOUR_ANON_KEY",
+      "eas": { "projectId": "" }
+    }
+  }
+}
